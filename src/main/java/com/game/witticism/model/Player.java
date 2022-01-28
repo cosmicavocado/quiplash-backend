@@ -16,6 +16,13 @@ public class Player {
     @Column
     private boolean isHost;
 
+    @Column
+    private String responses;
+
+    @ManyToOne
+    @JoinColumn(name="game_id")
+    private Game game;
+
     public Player() {
     }
 
