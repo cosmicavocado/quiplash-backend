@@ -28,4 +28,11 @@ public class GameController {
         LOGGER.info("Calling addPlayer from game controller.");
         gameService.addPlayer(playerName,code);
     }
+
+    // start game
+    @GetMapping(path="/game/start")
+    public void startGame() {
+        LOGGER.info("Calling startGame from game controller.");
+        gameService.startGame();
+    }
 }
