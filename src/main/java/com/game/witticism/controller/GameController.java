@@ -16,14 +16,14 @@ public class GameController {
     public void setGameService(GameService gameService) { this.gameService = gameService; }
 
     // create game
-    @PostMapping(path="/host/{hostName}/{code}")
+    @PostMapping(path="/game/host/{hostName}/{code}")
     public void createGame(@PathVariable String hostName, @PathVariable String code) {
         LOGGER.info("Calling createGame from game controller.");
         gameService.createGame(hostName,code);
     }
 
     // add player
-    @PostMapping(path="/game/{playerName}/{code}")
+    @PostMapping(path="/game/join/{playerName}/{code}")
     public void addPlayer(@PathVariable String playerName, @PathVariable String code) {
         LOGGER.info("Calling addPlayer from game controller.");
         gameService.addPlayer(playerName,code);
