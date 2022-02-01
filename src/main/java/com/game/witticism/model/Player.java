@@ -26,6 +26,10 @@ public class Player {
     public Player() {
     }
 
+    public Player(String name) {
+        this.name = name;
+    }
+
     public Long getId() {
         return id;
     }

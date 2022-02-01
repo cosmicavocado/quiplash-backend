@@ -3,6 +3,7 @@ package com.game.witticism.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "game")
@@ -23,11 +24,16 @@ public class Game {
 
     @JsonIgnore
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Player> players;
+    private ArrayList<Player> players;
 
     public Game() { }
 
-    public Game(List<Player> players) {
+    public Game(String code, ArrayList<Player> players) {
+        this.code = code;
+        this.players = players;
+    }
+
+    public Game(ArrayList<Player> players) {
         this.players = players;
     }
 
@@ -67,7 +73,7 @@ public class Game {
         return players;
     }
 
-    public void setPlayers(List<Player> players) {
+    public void setPlayers(ArrayList<Player> players) {
         this.players = players;
     }
 }
