@@ -53,4 +53,20 @@ public class Player {
     public void setHost(boolean host) {
         isHost = host;
     }
+
+    public String getResponses() {
+        return responses;
+    }
+
+    public void setResponses(String responses) {
+        this.responses = responses;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
 }
