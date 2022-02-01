@@ -69,7 +69,7 @@ public class Game {
         this.votes = votes;
     }
 
-    public List<Player> getPlayers() {
+    public ArrayList<Player> getPlayers() {
         return players;
     }
 
