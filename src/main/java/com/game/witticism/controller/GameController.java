@@ -21,4 +21,11 @@ public class GameController {
         LOGGER.info("Calling createGame from game controller.");
         gameService.createGame(hostName,code);
     }
+
+    // add player
+    @PostMapping(path="/game/{playerName}/{code}")
+    public void addPlayer(@PathVariable String playerName, @PathVariable String code) {
+        LOGGER.info("Calling addPlayer from game controller.");
+        gameService.addPlayer(playerName,code);
+    }
 }
