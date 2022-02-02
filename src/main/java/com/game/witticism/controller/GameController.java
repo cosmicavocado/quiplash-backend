@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-@CrossOrigin(origins="http:localhost:4200")
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins="http://localhost:4200")
 public class GameController {
     private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
     private GameService gameService;
