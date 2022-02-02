@@ -38,4 +38,11 @@ public class GameController {
         LOGGER.info("Calling startGame from game controller.");
         gameService.startGame(code);
     }
+
+    // get players
+    @GetMapping(path="/game/{gameId}/players")
+    public List<Player> getPlayers(@PathVariable Long gameId) {
+        LOGGER.info("Calling getPlayers from game controller.");
+        return gameService.getPlayers(gameId);
+    }
 }

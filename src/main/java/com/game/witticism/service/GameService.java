@@ -127,6 +127,14 @@ public class GameService {
         gameRepository.save(game);
     }
 
+    public List<Player> getPlayers(Long gameId) {
+        List<Player> players = playerRepository.findByGameId(gameId);
+        for(Player player : players){
+            System.out.println(player.getName());
+        }
+        return players;
+    }
+
     // DEAL PROMPTS
 
     // GET RESPONSES
