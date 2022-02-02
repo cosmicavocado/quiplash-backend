@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @Service
@@ -30,18 +32,37 @@ public class GameService {
 
     // create game
     public void createGame(String hostName, String code) {
-        // create empty array list to hold all players
-        ArrayList<Player> players = new ArrayList<>();
-        // create host Player object and save to DB
-        Player host = new Player(hostName);
+        Game game = gameRepository.findByCode(code);
+        // if game already exists
+        if(game != null) {
+            // check if game is active
+            if(game.isActive()) {
+                throw new InformationExistsException("The game with code " + code + " is already an active game.");
+            }
+        } else {
+            // create new game with given code
+            game = new Game(code);
+            game.setActive(true);
+            game.setRound(0);
+            // save Game to db
+            gameRepository.save(game);
+        }
+        // check if host already exists in db
+        Player host = playerRepository.findByName(hostName);
+        // if host does not exist
+        if(host == null) {
+            // create new Player host
+            host = new Player(hostName);
+            LOGGER.info("New player with name " + host.getName() + " created.");
+        }
+        // set player host to true
         host.setHost(true);
+        // set host game to current game
+        host.setGame(game);
+        // save host to db
         playerRepository.save(host);
-        // add host to players list
-        players.add(host);
-        // create new game with code and host
-        Game game = new Game(code, players);
-        // save Game to DB
-        gameRepository.save(game);
+
+        System.out.println("Host with name " + host.getName() + " created a game with code " + game.getCode());
     }
 
     // add player to game
@@ -73,12 +94,20 @@ public class GameService {
         // save player to db
         playerRepository.save(player);
         // get player list from game
-        ArrayList<Player> players = game.getPlayers();
+        List<Player> players = game.getPlayers();
         // add player to list
         players.add(player);
         // update game
         game.setPlayers(players);
         // save changes to db
         gameRepository.save(game);
+    }
+
+    // start game
+    public void startGame(String code) {
+        Game game = gameRepository.findByCode(code);
+        if(game == null) {
+            throw new InformationNotFoundException("Game with code " + code + " not found.");
+        }
     }
 }

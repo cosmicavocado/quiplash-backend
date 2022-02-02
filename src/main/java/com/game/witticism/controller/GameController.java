@@ -30,9 +30,9 @@ public class GameController {
     }
 
     // start game
-    @GetMapping(path="/game/start")
-    public void startGame() {
+    @GetMapping(path="/game/start/{code}")
+    public void startGame(@PathVariable String code) {
         LOGGER.info("Calling startGame from game controller.");
-        gameService.startGame();
+        gameService.startGame(code);
     }
 }
