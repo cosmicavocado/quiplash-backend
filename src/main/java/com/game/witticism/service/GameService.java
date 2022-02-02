@@ -66,7 +66,7 @@ public class GameService {
         // check if game exists
         Game game = gameRepository.findByCode(code);
         if(game == null) {
-            throw new InformationNotFoundException("Game with code " + code + " does not exist.");
+            throw new InformationNotFoundException("Game with code " + code + " not found.");
         }
         // check if player w/ name is already in game
         Player player = playerRepository.findByNameAndGameId(playerName, game.getId());
