@@ -22,19 +22,17 @@ public class Game {
     @Column
     private String votes;
 
+    @Column
+    private boolean isActive;
+
     @JsonIgnore
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArrayList<Player> players;
+    private List<Player> players;
 
     public Game() { }
 
-    public Game(String code, ArrayList<Player> players) {
+    public Game(String code) {
         this.code = code;
-        this.players = players;
-    }
-
-    public Game(ArrayList<Player> players) {
-        this.players = players;
     }
 
     public Long getId() {
@@ -69,11 +67,19 @@ public class Game {
         this.votes = votes;
     }
 
-    public ArrayList<Player> getPlayers() {
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public List<Player> getPlayers() {
         return players;
     }
 
-    public void setPlayers(ArrayList<Player> players) {
+    public void setPlayers(List<Player> players) {
         this.players = players;
     }
 }
