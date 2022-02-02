@@ -1,11 +1,14 @@
 package com.game.witticism.controller;
 
+import com.game.witticism.model.Player;
 import com.game.witticism.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.logging.Logger;
 
+@CrossOrigin(origins="http:localhost:4200")
 @RestController
 @RequestMapping("/api")
 public class GameController {
@@ -24,14 +27,14 @@ public class GameController {
 
     // add player
     @PostMapping(path="/game/join/{playerName}/{code}")
-    public void addPlayer(@PathVariable String playerName, @PathVariable String code) {
+    public void addPlayer(@PathVariable String playerName, @PathVariable String code) throws Exception {
         LOGGER.info("Calling addPlayer from game controller.");
         gameService.addPlayer(playerName,code);
     }
 
     // start game
     @GetMapping(path="/game/start/{code}")
-    public void startGame(@PathVariable String code) {
+    public void startGame(@PathVariable String code) throws Exception {
         LOGGER.info("Calling startGame from game controller.");
         gameService.startGame(code);
     }

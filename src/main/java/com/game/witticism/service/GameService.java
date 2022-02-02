@@ -4,11 +4,16 @@ import com.game.witticism.exception.InformationExistsException;
 import com.game.witticism.exception.InformationNotFoundException;
 import com.game.witticism.model.Game;
 import com.game.witticism.model.Player;
+import com.game.witticism.model.Prompt;
 import com.game.witticism.repository.GameRepository;
 import com.game.witticism.repository.PlayerRepository;
+import com.game.witticism.repository.PromptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 @Service
@@ -16,15 +21,20 @@ public class GameService {
     private static final Logger LOGGER = Logger.getLogger(GameService.class.getName());
     private GameRepository gameRepository;
     private PlayerRepository playerRepository;
+    private PromptRepository promptRepository;
+    private ArrayList<Prompt> prompts;
 
     @Autowired
     public void setGameRepository(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
     }
-
     @Autowired
     public void setPlayerRepository(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
+    }
+    @Autowired
+    public void setPromptRepository(PromptRepository promptRepository) {
+        this.promptRepository = promptRepository;
     }
 
     // CREATE GAME
@@ -62,11 +72,15 @@ public class GameService {
     }
 
     // ADD PLAYER
-    public void addPlayer(String playerName, String code) {
+    public void addPlayer(String playerName, String code) throws Exception{
         // check if game exists
         Game game = gameRepository.findByCode(code);
         if(game == null) {
             throw new InformationNotFoundException("Game with code " + code + " not found.");
+        }
+        // make sure max players have not been exceeded
+        if(game.getPlayers().size() == 8) {
+            throw new Exception("Must have 3-8 players to play.");
         }
         // check if player w/ name is already in game
         Player player = playerRepository.findByNameAndGameId(playerName, game.getId());
@@ -86,7 +100,7 @@ public class GameService {
                 player.setHost(false);
             }
         }
-        // update Players list
+        // update players list
         game.setPlayers(game.getPlayers());
         player.setGame(game);
         // update models in db
@@ -94,11 +108,28 @@ public class GameService {
         playerRepository.save(player);
     }
 
-    // start game
-    public void startGame(String code) {
+    // START GAME
+    public void startGame(String code) throws Exception {
         Game game = gameRepository.findByCode(code);
+        // if game doesn't exist
         if(game == null) {
             throw new InformationNotFoundException("Game with code " + code + " not found.");
         }
+        // if less than min players
+        if(game.getPlayers().size() < 3) {
+            throw new Exception("Must have 3-8 players to play.");
+        }
+        // start game
+        game.setRound(1);
+        // get prompts
+        prompts = (ArrayList<Prompt>) promptRepository.findAll();
+        // save game
+        gameRepository.save(game);
     }
+
+    // DEAL PROMPTS
+
+    // GET RESPONSES
+
+    // VOTE
 }
