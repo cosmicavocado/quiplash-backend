@@ -19,14 +19,14 @@ public class GameController {
     public void setGameService(GameService gameService) { this.gameService = gameService; }
 
     // create game
-    @PostMapping(path="/game/host/{hostName}/{code}")
+    @PostMapping(path="/game/{code}/host/{hostName}")
     public void createGame(@PathVariable String hostName, @PathVariable String code) {
         LOGGER.info("Calling createGame from game controller.");
         gameService.createGame(hostName,code);
     }
 
     // add player
-    @PostMapping(path="/game/join/{playerName}/{code}")
+    @PostMapping(path="/game/{code}/join/{playerName}")
     public void addPlayer(@PathVariable String playerName, @PathVariable String code) throws Exception {
         LOGGER.info("Calling addPlayer from game controller.");
         gameService.addPlayer(playerName,code);
