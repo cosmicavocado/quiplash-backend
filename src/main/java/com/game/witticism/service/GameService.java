@@ -74,24 +74,23 @@ public class GameService {
             // throw player exists
             throw new InformationExistsException("Player with name " + playerName + " is already in this game.");
         } else {
+            // look for player by name
             player = playerRepository.findByName(playerName);
-        }
-        if(player != null) {
-            // update player record in db
-            player.setGame(game);
-            player.setHost(false);
-        }
-        else {
-            // add new player to the db
-            player = new Player(playerName);
-            player.setHost(false);
+            if(player != null) {
+                // update player record in db
+                player.setGame(game);
+                player.setHost(false);
+            } else {
+                // add new player to the db
+                player = new Player(playerName);
+                player.setHost(false);
+            }
         }
         // update Players list
         game.setPlayers(game.getPlayers());
         player.setGame(game);
-        // save game to db
+        // update models in db
         gameRepository.save(game);
-        // save player to db
         playerRepository.save(player);
     }
 
