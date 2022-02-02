@@ -30,7 +30,7 @@ public class GameService {
         this.playerRepository = playerRepository;
     }
 
-    // create game
+    // CREATE GAME
     public void createGame(String hostName, String code) {
         Game game = gameRepository.findByCode(code);
         // if game already exists
@@ -40,7 +40,7 @@ public class GameService {
                 throw new InformationExistsException("The game with code " + code + " is already an active game.");
             }
         } else {
-            // create new game with given code
+            // create new game and set fields
             game = new Game(code);
             game.setActive(true);
             game.setRound(0);
@@ -51,7 +51,7 @@ public class GameService {
         Player host = playerRepository.findByName(hostName);
         // if host does not exist
         if(host == null) {
-            // create new Player host
+            // create new Player
             host = new Player(hostName);
             LOGGER.info("New player with name " + host.getName() + " created.");
         }
@@ -61,46 +61,41 @@ public class GameService {
         host.setGame(game);
         // save host to db
         playerRepository.save(host);
-
-        System.out.println("Host with name " + host.getName() + " created a game with code " + game.getCode());
+        LOGGER.info("Host with name " + host.getName() + " created a game with code " + game.getCode());
     }
 
-    // add player to game
+    // ADD PLAYER
     public void addPlayer(String playerName, String code) {
         // check if game exists
         Game game = gameRepository.findByCode(code);
         if(game == null) {
             throw new InformationNotFoundException("Game with code " + code + " does not exist.");
         }
-        // check if player with name is already in game
-        Player player = playerRepository.findByName(playerName);
+        // check if player w/ name is already in game
+        Player player = playerRepository.findByNameAndGameId(playerName, game.getId());
         if (player != null) {
-            // check if player with this name is in current game
-            if(player.getGame().getId().equals(game.getId())) {
-                // throw player exists
-                throw new InformationExistsException("Player with name " + playerName + " is already in this game.");
-            }
-            else {
-                // update player record in db
-                player.setGame(game);
-                player.setHost(false);
-            }
+            // throw player exists
+            throw new InformationExistsException("Player with name " + playerName + " is already in this game.");
+        } else {
+            player = playerRepository.findByName(playerName);
+        }
+        if(player != null) {
+            // update player record in db
+            player.setGame(game);
+            player.setHost(false);
         }
         else {
-            // else add new player to the db
+            // add new player to the db
             player = new Player(playerName);
             player.setHost(false);
         }
+        // update Players list
+        game.setPlayers(game.getPlayers());
+        player.setGame(game);
+        // save game to db
+        gameRepository.save(game);
         // save player to db
         playerRepository.save(player);
-        // get player list from game
-        List<Player> players = game.getPlayers();
-        // add player to list
-        players.add(player);
-        // update game
-        game.setPlayers(players);
-        // save changes to db
-        gameRepository.save(game);
     }
 
     // start game
