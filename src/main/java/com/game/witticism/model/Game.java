@@ -23,6 +23,9 @@ public class Game {
     private String votes;
 
     @Column
+    private String stage;
+
+    @Column
     private boolean isActive;
 
     @JsonIgnore
@@ -65,6 +68,14 @@ public class Game {
 
     public void setVotes(String votes) {
         this.votes = votes;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
     public boolean isActive() {
