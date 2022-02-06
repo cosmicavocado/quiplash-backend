@@ -1,5 +1,7 @@
 package com.game.witticism.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.game.witticism.model.Game;
 import com.game.witticism.model.Player;
 import com.game.witticism.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,9 @@ public class GameController {
 
     // create game
     @PostMapping(path="/game/{code}/host/{hostName}")
-    public void createGame(@PathVariable String hostName, @PathVariable String code) {
+    public Game createGame(@PathVariable String hostName, @PathVariable String code) {
         LOGGER.info("Calling createGame from game controller.");
-        gameService.createGame(hostName,code);
+        return gameService.createGame(hostName,code);
     }
 
     // add player
@@ -33,10 +35,16 @@ public class GameController {
     }
 
     // start game
-    @GetMapping(path="/game/start/{code}")
-    public void startGame(@PathVariable String code) throws Exception {
+    @GetMapping(path="/game/{code}/start")
+    public Game startGame(@PathVariable String code) throws Exception {
         LOGGER.info("Calling startGame from game controller.");
-        gameService.startGame(code);
+        return gameService.startGame(code);
+    }
+
+    // get game
+    @GetMapping(path="/game/{code}")
+    public Game getGame(@PathVariable String code) {
+        return gameService.getGame(code);
     }
 
     // get players
@@ -44,5 +52,12 @@ public class GameController {
     public List<Player> getPlayers(@PathVariable Long gameId) {
         LOGGER.info("Calling getPlayers from game controller.");
         return gameService.getPlayers(gameId);
+    }
+
+    // get prompts
+    @GetMapping(path="/game/{code}/draw")
+    public String getPrompts(@PathVariable String code) throws JsonProcessingException {
+        LOGGER.info("Calling getPrompts from gameController");
+        return gameService.getPrompts(code);
     }
 }

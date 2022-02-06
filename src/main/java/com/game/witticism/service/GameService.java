@@ -1,5 +1,8 @@
 package com.game.witticism.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.game.witticism.custom.Response;
 import com.game.witticism.exception.InformationExistsException;
 import com.game.witticism.exception.InformationNotFoundException;
 import com.game.witticism.model.Game;
@@ -12,8 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.logging.Logger;
 
 @Service
@@ -22,7 +26,10 @@ public class GameService {
     private GameRepository gameRepository;
     private PlayerRepository playerRepository;
     private PromptRepository promptRepository;
-    private ArrayList<Prompt> prompts;
+    private ArrayList<Prompt> drawn;
+    private Game currentGame;
+    private static final Random RNG = new Random();
+    private String gameCode;
 
     @Autowired
     public void setGameRepository(GameRepository gameRepository) {
@@ -38,7 +45,7 @@ public class GameService {
     }
 
     // CREATE GAME
-    public void createGame(String hostName, String code) {
+    public Game createGame(String hostName, String code) {
         Game game = gameRepository.findByCode(code);
         // if game already exists
         if(game != null) {
@@ -69,6 +76,7 @@ public class GameService {
         // save host to db
         playerRepository.save(host);
         LOGGER.info("Host with name " + host.getName() + " created a game with code " + game.getCode());
+        return game;
     }
 
     // ADD PLAYER
@@ -106,10 +114,11 @@ public class GameService {
         // update models in db
         gameRepository.save(game);
         playerRepository.save(player);
+        currentGame = game;
     }
 
     // START GAME
-    public void startGame(String code) throws Exception {
+    public Game startGame(String code) throws Exception {
         Game game = gameRepository.findByCode(code);
         // if game doesn't exist
         if(game == null) {
@@ -122,9 +131,11 @@ public class GameService {
         // start game
         game.setRound(1);
         // get prompts
-        prompts = (ArrayList<Prompt>) promptRepository.findAll();
+//        prompts = (ArrayList<Prompt>) promptRepository.findAll();
         // save game
         gameRepository.save(game);
+        currentGame = game;
+        return game;
     }
 
     public List<Player> getPlayers(Long gameId) {
@@ -135,9 +146,49 @@ public class GameService {
         return players;
     }
 
-    // DEAL PROMPTS
+    // GET GAME
+    public Game getGame(String code) {
+        return gameRepository.findByCode(code);
+    }
+
+    // DRAW PROMPTS (filter for discards later)
+    public String getPrompts(String code) throws JsonProcessingException {
+        // get current game
+        Game game = gameRepository.findByCode(code);
+        // get current players
+        List<Player> players = game.getPlayers();
+        // num of prompts
+        long deckSize = promptRepository.count();
+        // temp list to keep track of cards this round
+        List<Prompt> tmpList = new ArrayList<>(players.size());
+        // for each player
+        players.forEach(player -> {
+            // get random num
+            int rng = RNG.nextInt((int)deckSize);
+            // get random prompt
+            Optional<Prompt> randPrompt = promptRepository.findById((long) rng);
+            // temp store these prompts
+            tmpList.add(randPrompt.get());
+        });
+        // instantiate Jackson Obj Mapper
+        ObjectMapper mapper = new ObjectMapper();
+        // map prompts to json string
+        String json = mapper.writeValueAsString(tmpList);
+        System.out.println(json);
+//        return mapper.writeValueAsString(tmpList);
+        return json;
+    }
+
+    // UPDATE DISCARDS
 
     // GET RESPONSES
+    public Response getResponse(Response response) {
+        return response;
+    }
 
     // VOTE
+
+    // GET SCORES
+
+    // END GAME
 }
