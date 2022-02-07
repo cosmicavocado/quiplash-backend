@@ -1,6 +1,7 @@
 package com.game.witticism.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.witticism.custom.Response;
 import com.game.witticism.exception.InformationExistsException;
@@ -71,6 +72,7 @@ public class GameService {
         }
         // set player host to true
         host.setHost(true);
+        host.setResponses("");
         // set host game to current game
         host.setGame(game);
         // save host to db
@@ -101,12 +103,12 @@ public class GameService {
             if(player != null) {
                 // update player record in db
                 player.setGame(game);
-                player.setHost(false);
             } else {
                 // add new player to the db
                 player = new Player(playerName);
-                player.setHost(false);
             }
+            player.setHost(false);
+            player.setResponses("");
         }
         // update players list
         game.setPlayers(game.getPlayers());
@@ -130,8 +132,10 @@ public class GameService {
         }
         // start game
         game.setRound(1);
-        // get prompts
-//        prompts = (ArrayList<Prompt>) promptRepository.findAll();
+        // set stage
+        game.setStage("response");
+        // set votes
+        game.setVotes("");
         // save game
         gameRepository.save(game);
         currentGame = game;
@@ -179,11 +183,31 @@ public class GameService {
         return json;
     }
 
-    // UPDATE DISCARDS
-
     // GET RESPONSES
-    public Response getResponse(Response response) {
-        return response;
+    public String sendResponse(Response response) throws JsonProcessingException {
+        // mapper
+        ObjectMapper mapper = new ObjectMapper();
+        // list
+        List<Response> resp = new ArrayList<>();
+        // get player
+        Player player = playerRepository.getById(response.getPlayerId());
+        // get responses
+        String responses = player.getResponses();
+        // check responses length
+        if(!responses.equals("")) {
+            // read responses String into Response list
+            resp = mapper.readValue(responses, new TypeReference<>(){});
+        }
+        // add new response
+        resp.add(response);
+        // convert response to string
+        String jsonResp = mapper.writeValueAsString(resp);
+        // update responses in player
+        player.setResponses(jsonResp);
+        // save updates
+        playerRepository.save(player);
+        // return resp string
+        return jsonResp;
     }
 
     // VOTE

@@ -1,6 +1,7 @@
 package com.game.witticism.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.game.witticism.custom.Response;
 import com.game.witticism.model.Game;
 import com.game.witticism.model.Player;
 import com.game.witticism.service.GameService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 @RestController
@@ -59,5 +61,11 @@ public class GameController {
     public String getPrompts(@PathVariable String code) throws JsonProcessingException {
         LOGGER.info("Calling getPrompts from gameController");
         return gameService.getPrompts(code);
+    }
+
+    // submit response
+    @PostMapping("/game/response")
+    public String sendResponse(@RequestBody Response response) throws JsonProcessingException {
+        return gameService.sendResponse(response);
     }
 }
