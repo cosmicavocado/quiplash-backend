@@ -173,10 +173,7 @@ public class GameService {
         // instantiate Jackson Obj Mapper
         ObjectMapper mapper = new ObjectMapper();
         // map prompts to json string
-        String json = mapper.writeValueAsString(tmpList);
-        System.out.println(json);
-//        return mapper.writeValueAsString(tmpList);
-        return json;
+        return mapper.writeValueAsString(tmpList);
     }
 
     // GET RESPONSES
