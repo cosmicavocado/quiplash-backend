@@ -1,29 +1,33 @@
 package com.game.witticism.custom;
 
-import java.util.List;
-
 public class Response {
-    private String promptText;
-    private String playerName;
+    private Long promptId;
+    private Long playerId;
     private String responseText;
 
     public Response() {
     }
 
-    public String getPromptText() {
-        return promptText;
+    public Response(Long promptId, Long playerId, String responseText) {
+        this.promptId = promptId;
+        this.playerId = playerId;
+        this.responseText = responseText;
     }
 
-    public void setPromptText(String promptText) {
-        this.promptText = promptText;
+    public Long getPromptId() {
+        return promptId;
     }
 
-    public String getPlayerName() {
-        return playerName;
+    public void setPromptId(Long promptId) {
+        this.promptId = promptId;
     }
 
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
     }
 
     public String getResponseText() {
