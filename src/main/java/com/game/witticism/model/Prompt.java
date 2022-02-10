@@ -1,7 +1,10 @@
 package com.game.witticism.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Entity
 @Table(name = "prompt")
 public class Prompt {
