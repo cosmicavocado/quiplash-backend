@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity(name = "game")
+@Table(name = "game")
 public class Game {
     @Id
     @Column
@@ -18,7 +19,7 @@ public class Game {
     @Column
     private int round;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String votes;
 
     @Column
