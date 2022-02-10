@@ -16,7 +16,7 @@ public class Player {
     @Column
     private boolean isHost;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String responses;
 
     @ManyToOne
