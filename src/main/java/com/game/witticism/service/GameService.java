@@ -151,33 +151,22 @@ public class GameService {
         return gameRepository.findByCode(code);
     }
 
-    // DRAW PROMPTS (filter for discards later)
-    public String getPrompts(String code) throws JsonProcessingException {
+    // DRAW PROMPT (filter for discards later)
+    public Prompt getPrompt(String code) {
         // get current game
         Game game = gameRepository.findByCode(code);
-        // get current players
-        List<Player> players = game.getPlayers();
         // num of prompts
         long deckSize = promptRepository.count();
-        // temp list to keep track of cards this round
-        List<Prompt> tmpList = new ArrayList<>(players.size());
-        // for each player
-        players.forEach(player -> {
-            // get random num
-            int rng = RNG.nextInt((int)deckSize);
-            // get random prompt
-            Optional<Prompt> randPrompt = promptRepository.findById((long) rng);
-            // temp store these prompts
-            tmpList.add(randPrompt.get());
-        });
-        // instantiate Jackson Obj Mapper
-        ObjectMapper mapper = new ObjectMapper();
-        // map prompts to json string
-        return mapper.writeValueAsString(tmpList);
+        // get random num
+        int rng = RNG.nextInt((int)deckSize);
+        // get random prompt
+        return promptRepository.getById((long) rng);
     }
 
-    // GET RESPONSES
+    // GET RESPONSE
     public String sendResponse(Response response) throws JsonProcessingException {
+        LOGGER.info("Calling send response");
+        System.out.println(response.getResponseText());
         // mapper
         ObjectMapper mapper = new ObjectMapper();
         // list

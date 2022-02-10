@@ -4,17 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.game.witticism.custom.Response;
 import com.game.witticism.model.Game;
 import com.game.witticism.model.Player;
+import com.game.witticism.model.Prompt;
 import com.game.witticism.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Logger;
 
+@CrossOrigin(origins="http://localhost:4200")
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins="http://localhost:4200")
 public class GameController {
     private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
     private GameService gameService;
@@ -58,14 +58,15 @@ public class GameController {
 
     // get prompts
     @GetMapping(path="/game/{code}/draw")
-    public String getPrompts(@PathVariable String code) throws JsonProcessingException {
+    public Prompt getPrompt(@PathVariable String code) {
         LOGGER.info("Calling getPrompts from gameController");
-        return gameService.getPrompts(code);
+        return gameService.getPrompt(code);
     }
 
     // submit response
     @PostMapping("/game/response")
     public String sendResponse(@RequestBody Response response) throws JsonProcessingException {
+        LOGGER.info("Calling sendResponse from gameController");
         return gameService.sendResponse(response);
     }
 }
