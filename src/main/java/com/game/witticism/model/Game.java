@@ -3,6 +3,7 @@ package com.game.witticism.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "game")
@@ -18,6 +19,15 @@ public class Game {
 
     @Column
     private int round;
+
+    @Column
+    private int responseCount;
+
+    @Column(columnDefinition = "TEXT")
+    private String prompts;
+
+    @Column(columnDefinition = "TEXT")
+    private String currPrompt;
 
     @Column(columnDefinition="TEXT")
     private String votes;
@@ -62,6 +72,14 @@ public class Game {
         this.round = round;
     }
 
+    public int getResponseCount() {
+        return responseCount;
+    }
+
+    public void setResponseCount(int responseCount) {
+        this.responseCount = responseCount;
+    }
+
     public String getVotes() {
         return votes;
     }
@@ -92,5 +110,21 @@ public class Game {
 
     public void setPlayers(List<Player> players) {
         this.players = players;
+    }
+
+    public String getPrompts() {
+        return prompts;
+    }
+
+    public void setPrompts(String prompts) {
+        this.prompts = prompts;
+    }
+
+    public String getCurrPrompt() {
+        return currPrompt;
+    }
+
+    public void setCurrPrompt(String currPrompt) {
+        this.currPrompt = currPrompt;
     }
 }

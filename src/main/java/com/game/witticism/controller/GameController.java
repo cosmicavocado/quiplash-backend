@@ -49,6 +49,12 @@ public class GameController {
         return gameService.getGame(code);
     }
 
+    // get player
+    @GetMapping(path="/game/{gameId}/player/{name}")
+    public Player getPlayer(@PathVariable String name, @PathVariable Long gameId) {
+        return gameService.getPlayer(name,gameId);
+    }
+
     // get players
     @GetMapping(path="/game/{gameId}/players")
     public List<Player> getPlayers(@PathVariable Long gameId) {
@@ -58,7 +64,7 @@ public class GameController {
 
     // get prompts
     @GetMapping(path="/game/{code}/draw")
-    public Prompt getPrompt(@PathVariable String code) {
+    public Prompt getPrompt(@PathVariable String code) throws JsonProcessingException {
         LOGGER.info("Calling getPrompts from gameController");
         return gameService.getPrompt(code);
     }
@@ -66,7 +72,13 @@ public class GameController {
     // submit response
     @PostMapping("/game/response")
     public String sendResponse(@RequestBody Response response) throws JsonProcessingException {
-        LOGGER.info("Calling sendResponse from gameController");
+        LOGGER.info("Calling sendResponse from game controller");
         return gameService.sendResponse(response);
+    }
+
+    @GetMapping(path="/game/{code}/update")
+    public Game checkGame(@PathVariable String code) throws JsonProcessingException {
+        LOGGER.info("Calling updateGame from game controller.");
+        return gameService.checkGame(code);
     }
 }

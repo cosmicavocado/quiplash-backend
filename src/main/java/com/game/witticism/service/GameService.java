@@ -15,10 +15,7 @@ import com.game.witticism.repository.PromptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -27,7 +24,7 @@ public class GameService {
     private GameRepository gameRepository;
     private PlayerRepository playerRepository;
     private PromptRepository promptRepository;
-    private ArrayList<Prompt> drawn;
+    private ArrayList<Prompt> deck;
     private Game currentGame;
     private static final Random RNG = new Random();
     private String gameCode;
@@ -136,43 +133,71 @@ public class GameService {
         game.setStage("response");
         // set votes
         game.setVotes("");
+        // deck
+        deck = (ArrayList<Prompt>) promptRepository.findAll();
+        // list to hold drawn prompts
+        ArrayList<Prompt> drawnPrompts = new ArrayList<>();
+        // loop drawing from deck
+        for(int i=0; i<3; i++) {
+            int n = RNG.nextInt(deck.size());
+            Prompt prompt = deck.get(n);
+            drawnPrompts.add(prompt);
+            deck.remove(n);
+        }
+        Prompt currPrompt = drawnPrompts.get(0);
+
+        // mapper
+        ObjectMapper mapper = new ObjectMapper();
+        // write all prompts as string
+        String promptsStr = mapper.writeValueAsString(drawnPrompts);
+        game.setPrompts(promptsStr);
+        // write current prompt as string
+        String currPromptStr = mapper.writeValueAsString(currPrompt);
+        game.setCurrPrompt(currPromptStr);
         // save game
         gameRepository.save(game);
-        currentGame = game;
         return game;
     }
 
+    // GET PLAYER
+    public Player getPlayer(String name, Long gameId) {
+        return playerRepository.findByNameAndGameId(name,gameId);
+    }
+
+    // GET LIST OF PLAYERS
     public List<Player> getPlayers(Long gameId) {
         return playerRepository.findByGameId(gameId);
     }
 
     // GET GAME
     public Game getGame(String code) {
+        LOGGER.info("Calling getGame from controller.");
         return gameRepository.findByCode(code);
     }
 
-    // DRAW PROMPT (filter for discards later)
-    public Prompt getPrompt(String code) {
+    // DRAW PROMPT
+    public Prompt getPrompt(String code) throws JsonProcessingException {
         // get current game
         Game game = gameRepository.findByCode(code);
-        // num of prompts
-        long deckSize = promptRepository.count();
-        // get random num
-        int rng = RNG.nextInt((int)deckSize);
-        // get random prompt
-        return promptRepository.getById((long) rng);
+        // get string to map
+        String currPromptStr = game.getCurrPrompt();
+        // mapper
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(currPromptStr, new TypeReference<>(){});
     }
 
     // GET RESPONSE
     public String sendResponse(Response response) throws JsonProcessingException {
         LOGGER.info("Calling send response");
-        System.out.println(response.getResponseText());
+        // get player
+        Long playerId = response.getPlayerId();
+        Player player = playerRepository.getById(playerId);
+        // get game
+        Game game = player.getGame();
         // mapper
         ObjectMapper mapper = new ObjectMapper();
         // list
         List<Response> resp = new ArrayList<>();
-        // get player
-        Player player = playerRepository.getById(response.getPlayerId());
         // get responses
         String responses = player.getResponses();
         // check responses length
@@ -186,10 +211,50 @@ public class GameService {
         String jsonResp = mapper.writeValueAsString(resp);
         // update responses in player
         player.setResponses(jsonResp);
+        // count responses
+        int count = game.getResponseCount();
+        game.setResponseCount(count+1);
         // save updates
         playerRepository.save(player);
+        gameRepository.save(game);
         // return resp string
         return jsonResp;
+    }
+
+    // UPDATE GAME
+    public Game checkGame(String code) throws JsonProcessingException {
+        Game game = gameRepository.findByCode(code);
+        int numResponses = game.getResponseCount();
+        int currRound = game.getRound();
+        int numPlayers = game.getPlayers().size();
+
+        // mapper
+        ObjectMapper mapper = new ObjectMapper();
+
+        // if all players have responded
+        if (numResponses == numPlayers * currRound) {
+            // update round
+            game.setRound(currRound+1);
+            currRound = game.getRound();
+
+            // list to hold prompts
+            ArrayList<Prompt> prompts;
+            // get prompts as string
+            String promptsStr = game.getPrompts();
+            // read string into list
+            prompts = mapper.readValue(promptsStr, new TypeReference<>(){});
+            // pull another prompt
+            Prompt prompt = prompts.get(currRound-1);
+            // read into string
+            String promptStr = mapper.writeValueAsString(prompt);
+            // update current prompt
+            game.setCurrPrompt(promptStr);
+
+            // update stage
+            game.setStage("vote");
+        }
+        gameRepository.save(game);
+        return game;
     }
 
     // VOTE
