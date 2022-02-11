@@ -16,6 +16,9 @@ public class Player {
     @Column
     private boolean host;
 
+    @Column
+    private int score;
+
     @Column(columnDefinition="TEXT")
     private String responses;
 
@@ -52,6 +55,14 @@ public class Player {
 
     public void setHost(boolean host) {
         this.host = host;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     public String getResponses() {

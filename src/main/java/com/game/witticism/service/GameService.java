@@ -239,10 +239,17 @@ public class GameService {
 
         // if all players have responded
         if (numResponses == numPlayers * currRound) {
-            // update round
-            game.setRound(currRound+1);
-            currRound = game.getRound();
+            // update stage
+            game.setStage("vote");
+        }
 
+        // if all players have voted
+        if (game.getStage().equals("vote") && game.getVoteCount() == numPlayers * currRound) {
+            game.setStage("score");
+        }
+
+        // scoring / set up next round
+        if (game.getStage().equals("score")) {
             // list to hold prompts
             ArrayList<Prompt> prompts;
             // get prompts as string
@@ -256,9 +263,10 @@ public class GameService {
             // update current prompt
             game.setCurrPrompt(promptStr);
 
-            // update stage
-            game.setStage("vote");
+            // update round
+            game.setRound(currRound+1);
         }
+        // save changes
         gameRepository.save(game);
         return game;
     }
@@ -281,7 +289,36 @@ public class GameService {
     }
 
     // VOTE
-   
+    public Vote sendVote(String code, Long playerId, Response response) throws JsonProcessingException {
+        // get game
+        Game game = gameRepository.findByCode(code);
+        // create vote
+        Vote vote = new Vote(response, playerId);
+        // get votes string
+        String voteStr = game.getVotes();
+        // define mapper
+        ObjectMapper mapper = new ObjectMapper();
+        // list to hold votes
+        ArrayList<Vote> votesList = new ArrayList<>();
+        if (!voteStr.equals("")) {
+            votesList = mapper.readValue(voteStr, new TypeReference<>(){});
+        }
+        // add new vote
+        votesList.add(vote);
+        // back to string
+        voteStr = mapper.writeValueAsString(votesList);
+        // update game
+        game.setVotes(voteStr);
+        game.setVoteCount(game.getVoteCount()+1);
+        gameRepository.save(game);
+        // update player score
+        Long winner = response.getPlayerId();
+        Player player = playerRepository.getById(winner);
+        player.setScore(player.getScore() + 10);
+        playerRepository.save(player);
+        return vote;
+    }
+
     // GET SCORES
 
     // END GAME

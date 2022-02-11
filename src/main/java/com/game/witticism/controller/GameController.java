@@ -2,6 +2,7 @@ package com.game.witticism.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.game.witticism.custom.Response;
+import com.game.witticism.custom.Vote;
 import com.game.witticism.model.Game;
 import com.game.witticism.model.Player;
 import com.game.witticism.model.Prompt;
@@ -87,5 +88,11 @@ public class GameController {
     public ArrayList<Response> getResponses(@PathVariable String code, @PathVariable Long promptId) {
         LOGGER.info("Calling getResponses from game controller.");
         return gameService.getResponses(code, promptId);
+    }
+
+    @PostMapping(path="/game/{code}/vote/{playerId}")
+    public Vote sendVote(@PathVariable String code, @PathVariable Long playerId, @RequestBody Response response) throws JsonProcessingException {
+        LOGGER.info("Calling sendVote from game controller.");
+        return gameService.sendVote(code,playerId,response);
     }
 }
