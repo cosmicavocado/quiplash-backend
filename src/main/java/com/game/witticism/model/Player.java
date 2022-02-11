@@ -26,6 +26,12 @@ public class Player {
     @JoinColumn(name="game_id")
     private Game game;
 
+    @Column
+    private boolean responded;
+
+    @Column
+    private boolean voted;
+
     public Player() {
     }
 
@@ -49,7 +55,7 @@ public class Player {
         this.name = name;
     }
 
-    public boolean getHost() {
+    public boolean isHost() {
         return host;
     }
 
@@ -79,5 +85,21 @@ public class Player {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    public boolean isResponded() {
+        return responded;
+    }
+
+    public void setResponded(boolean responded) {
+        this.responded = responded;
+    }
+
+    public boolean isVoted() {
+        return voted;
+    }
+
+    public void setVoted(boolean voted) {
+        this.voted = voted;
     }
 }

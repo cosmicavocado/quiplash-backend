@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 @Service
@@ -81,7 +82,8 @@ public class GameService {
         host.setHost(true);
         host.setResponses("");
         host.setScore(0);
-        // set host game to current game
+        host.setResponded(false);
+        host.setVoted(false);
         host.setGame(game);
         // save host to db
         playerRepository.save(host);
@@ -117,6 +119,8 @@ public class GameService {
             }
             player.setHost(false);
             player.setResponses("");
+            player.setResponded(false);
+            player.setVoted(false);
         }
         // update players list
         game.setPlayers(game.getPlayers());
@@ -224,6 +228,8 @@ public class GameService {
         // count responses
         int count = game.getResponseCount();
         game.setResponseCount(count+1);
+        // update boolean
+        player.setResponded(true);
         // save updates
         playerRepository.save(player);
         gameRepository.save(game);
@@ -234,43 +240,61 @@ public class GameService {
     // UPDATE GAME
     public Game checkGame(String code) throws JsonProcessingException {
         Game game = gameRepository.findByCode(code);
-        boolean reset = false;
+        if (game == null) {
+            throw new InformationNotFoundException("Game doesn't exist");
+        }
         int numResponses = game.getResponseCount();
         int currRound = game.getRound();
         int numPlayers = game.getPlayers().size();
 
         // mapper
         ObjectMapper mapper = new ObjectMapper();
+        // get prompts as string
+        String promptsStr = game.getPrompts();
+        // read string into list
+        List<Prompt> promptsTmp = mapper.readValue(promptsStr, new TypeReference<>() {
+        });
+        // pull another prompt
+        Prompt prompt = promptsTmp.get(currRound-1);
+        // read into string
+        String promptStr = mapper.writeValueAsString(prompt);
+        // update current prompt
+        game.setCurrPrompt(promptStr);
 
         // if all players have responded
         if (numResponses == numPlayers * currRound) {
             // update stage
             game.setStage("vote");
+            gameRepository.save(game);
         }
 
         // if all players have voted
         if (game.getStage().equals("vote") && game.getVoteCount() == numPlayers * currRound) {
             game.setStage("score");
+            List<Player> players = game.getPlayers();
+            players.forEach(player -> {
+                player.setResponded(false);
+                player.setVoted(false);
+                playerRepository.save(player);
+            });
+            gameRepository.save(game);
         }
 
         // scoring / set up next round
         if (game.getStage().equals("score")) {
-            // list to hold prompts
-            ArrayList<Prompt> prompts;
-            // get prompts as string
-            String promptsStr = game.getPrompts();
-            // read string into list
-            prompts = mapper.readValue(promptsStr, new TypeReference<>(){});
-            // pull another prompt
-            Prompt prompt = prompts.get(game.getRound()-1);
-            // read into string
-            String promptStr = mapper.writeValueAsString(prompt);
-            // update current prompt
-            game.setCurrPrompt(promptStr);
-            // update round
-            game.setRound(currRound+1);
-            // update stage
-            game.setStage("response");
+            if(game.getRound() == 3) {
+                game.setStage("end");
+            } else {
+                // update round
+                game.setRound(currRound+1);
+                // update stage
+                game.setStage("response");
+                gameRepository.save(game);
+            }
+        }
+
+        if (game.getStage().equals("end")) {
+            game.setActive(false);
         }
         // save changes
         gameRepository.save(game);
@@ -317,15 +341,16 @@ public class GameService {
         game.setVotes(voteStr);
         game.setVoteCount(game.getVoteCount()+1);
         gameRepository.save(game);
-        // update player score
-        Long winner = response.getPlayerId();
-        Player player = playerRepository.getById(winner);
-        player.setScore(player.getScore() + 10);
+        // update voting player status
+        Player player = playerRepository.getById(playerId);
+        player.setVoted(true);
         playerRepository.save(player);
+        // update winning player score
+        Long winnerId = response.getPlayerId();
+        Player winner = playerRepository.getById(winnerId);
+        winner.setScore(winner.getScore() + 10);
+        LOGGER.info("Winner " + winner.getName() + " score is: " + winner.getScore());
+        playerRepository.save(winner);
         return vote;
     }
-
-    // GET SCORES
-
-    // END GAME
 }

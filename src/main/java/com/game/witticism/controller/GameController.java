@@ -79,7 +79,7 @@ public class GameController {
     }
 
     @GetMapping(path="/game/{code}/update")
-    public Game checkGame(@PathVariable String code) throws JsonProcessingException {
+    public Game checkGame(@PathVariable String code) throws JsonProcessingException, InterruptedException {
         LOGGER.info("Calling updateGame from game controller.");
         return gameService.checkGame(code);
     }
