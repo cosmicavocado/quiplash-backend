@@ -55,18 +55,20 @@ public class GameService {
         } else {
             // create new game and initialize fields
             game = new Game(code);
-            game.setActive(true);
-            game.setRound(0);
-            game.setResponseCount(0);
-            game.setVoteCount(0);
-            game.setPrompts("");
-            game.setCurrPrompt("");
-            game.setVotes("");
-            game.setStage("join");
-
-            // save Game to db
-            gameRepository.save(game);
         }
+        // initialize fields
+        game.setActive(true);
+        game.setRound(0);
+        game.setResponseCount(0);
+        game.setVoteCount(0);
+        game.setPrompts("");
+        game.setCurrPrompt("");
+        game.setVotes("");
+        game.setStage("join");
+
+        // save Game to db
+        gameRepository.save(game);
+
         // check if host already exists in db
         Player host = playerRepository.findByName(hostName);
         // if host does not exist
@@ -78,6 +80,7 @@ public class GameService {
         // set player host to true
         host.setHost(true);
         host.setResponses("");
+        host.setScore(0);
         // set host game to current game
         host.setGame(game);
         // save host to db
@@ -117,6 +120,7 @@ public class GameService {
         }
         // update players list
         game.setPlayers(game.getPlayers());
+        player.setScore(0);
         player.setGame(game);
         // update models in db
         gameRepository.save(game);
@@ -230,6 +234,7 @@ public class GameService {
     // UPDATE GAME
     public Game checkGame(String code) throws JsonProcessingException {
         Game game = gameRepository.findByCode(code);
+        boolean reset = false;
         int numResponses = game.getResponseCount();
         int currRound = game.getRound();
         int numPlayers = game.getPlayers().size();
@@ -257,14 +262,15 @@ public class GameService {
             // read string into list
             prompts = mapper.readValue(promptsStr, new TypeReference<>(){});
             // pull another prompt
-            Prompt prompt = prompts.get(currRound-1);
+            Prompt prompt = prompts.get(game.getRound()-1);
             // read into string
             String promptStr = mapper.writeValueAsString(prompt);
             // update current prompt
             game.setCurrPrompt(promptStr);
-
             // update round
             game.setRound(currRound+1);
+            // update stage
+            game.setStage("response");
         }
         // save changes
         gameRepository.save(game);
