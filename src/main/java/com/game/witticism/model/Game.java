@@ -23,6 +23,9 @@ public class Game {
     @Column
     private int responseCount;
 
+    @Column
+    private int voteCount;
+
     @Column(columnDefinition = "TEXT")
     private String prompts;
 
@@ -126,5 +129,13 @@ public class Game {
 
     public void setCurrPrompt(String currPrompt) {
         this.currPrompt = currPrompt;
+    }
+
+    public int getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(int voteCount) {
+        this.voteCount = voteCount;
     }
 }

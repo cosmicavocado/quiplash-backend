@@ -9,6 +9,7 @@ import com.game.witticism.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -80,5 +81,11 @@ public class GameController {
     public Game checkGame(@PathVariable String code) throws JsonProcessingException {
         LOGGER.info("Calling updateGame from game controller.");
         return gameService.checkGame(code);
+    }
+
+    @GetMapping(path="/game/{code}/responses/{promptId}")
+    public ArrayList<Response> getResponses(@PathVariable String code, @PathVariable Long promptId) {
+        LOGGER.info("Calling getResponses from game controller.");
+        return gameService.getResponses(code, promptId);
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.witticism.custom.Response;
+import com.game.witticism.custom.Vote;
 import com.game.witticism.exception.InformationExistsException;
 import com.game.witticism.exception.InformationNotFoundException;
 import com.game.witticism.model.Game;
@@ -52,10 +53,17 @@ public class GameService {
                 throw new InformationExistsException("The game with code " + code + " is already an active game.");
             }
         } else {
-            // create new game and set fields
+            // create new game and initialize fields
             game = new Game(code);
             game.setActive(true);
             game.setRound(0);
+            game.setResponseCount(0);
+            game.setVoteCount(0);
+            game.setPrompts("");
+            game.setCurrPrompt("");
+            game.setVotes("");
+            game.setStage("join");
+
             // save Game to db
             gameRepository.save(game);
         }
@@ -131,8 +139,6 @@ public class GameService {
         game.setRound(1);
         // set stage
         game.setStage("response");
-        // set votes
-        game.setVotes("");
         // deck
         deck = (ArrayList<Prompt>) promptRepository.findAll();
         // list to hold drawn prompts
@@ -186,7 +192,7 @@ public class GameService {
         return mapper.readValue(currPromptStr, new TypeReference<>(){});
     }
 
-    // GET RESPONSE
+    // SEND RESPONSE
     public String sendResponse(Response response) throws JsonProcessingException {
         LOGGER.info("Calling send response");
         // get player
@@ -257,8 +263,25 @@ public class GameService {
         return game;
     }
 
-    // VOTE
+    // GET ALL RESPONSES
+    public ArrayList<Response> getResponses(String code, Long promptId) {
+        ObjectMapper mapper = new ObjectMapper();
+        Game game = gameRepository.findByCode(code);
+        List<Player> players = game.getPlayers();
+        ArrayList<Response> temp = new ArrayList<>();
+        players.forEach(player -> {
+            try {
+                ArrayList<Response>responses = mapper.readValue(player.getResponses(), new TypeReference<>(){});
+                responses.stream().filter(resp -> (resp.getPromptId().equals(promptId))).forEach(temp::add);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
+        return temp;
+    }
 
+    // VOTE
+   
     // GET SCORES
 
     // END GAME
